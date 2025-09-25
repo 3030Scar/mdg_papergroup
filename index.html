@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>论文复现组 - 智能基座</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #ff00ff;
+            --accent-color: #7c3aed;
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(20, 25, 47, 0.8);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景动画粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .particle.hover {
+            width: 4px;
+            height: 4px;
+            opacity: 0.8;
+            background: var(--secondary-color);
+            box-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) translateX(0);
+            }
+            to {
+                transform: translateY(-100px) translateX(100px);
+            }
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* 卡片样式 */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.02), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* 联系方式卡片 */
+        .contact-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .contact-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* 资源下载区 */
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .download-btn {
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* 重要网址 */
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .link-item {
+            padding: 1.5rem;
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid transparent;
+        }
+
+        .link-item:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+        }
+
+        .link-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 学习路线 */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -44px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid var(--bg-dark);
+        }
+
+        .timeline-date {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 通知栏 */
+        .notification {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 212, 255, 0.1));
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 滚动条样式 - 增强版 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar:hover {
+            width: 14px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        ::-webkit-scrollbar-track:hover {
+            background: linear-gradient(180deg, rgba(10, 14, 39, 0.8), rgba(26, 31, 58, 0.9));
+            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00e5ff, #ff1493);
+            box-shadow: 
+                0 0 15px rgba(0, 212, 255, 0.6),
+                0 0 25px rgba(255, 0, 255, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.8),
+                0 0 30px rgba(255, 0, 255, 0.6),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            transform: scale(1.15);
+        }
+
+        /* 滚动条角落 */
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🤖 论文复现组</div>
+            <ul class="nav-links">
+                <li><a href="#about">简介</a></li>
+                <li><a href="#resources">资源</a></li>
+                <li><a href="#roadmap">学习路线</a></li>
+                <li><a href="#notices">通知</a></li>
+                <li><a href="#meetings">例会</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>论文复现组</h1>
+            <p>探索人工智能前沿 · 复现经典论文 · 构建学术基础</p>
+        </section>
+
+        <!-- 简介和联系方式 -->
+        <section id="about" class="section">
+            <h2 class="section-title">关于我们</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📚 组织简介</h3>
+                    <p style="line-height: 1.8;">论文复现组主要研读和复现人工智能领域的经典论文，一起讨论、交流学术内容，也会适当地发散式探索人工智能领域其他技术，适合自学能力强、想打下人工智能研究基础的同学。</p>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">我们专注于深度学习、计算机视觉、自然语言处理等前沿领域，通过实践加深理论理解。</p>
+                </div>
+                <div class="card contact-card">
+                    <div class="contact-avatar">张</div>
+                    <div>
+                        <h3 style="color: var(--primary-color);">部长：张三</h3>
+                        <p>📧 zhangsan@example.com</p>
+                        <p>📱 WeChat: AI_Research_2024</p>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">欢迎对AI研究感兴趣的同学联系</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资源下载 -->
+        <section id="resources" class="section">
+            <h2 class="section-title">资源下载</h2>
+            <div class="card">
+                <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📁 论文与代码</h3>
+                <div class="resource-item">
+                    <div>
+                        <strong>Attention Is All You Need</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Transformer架构原始论文</p>
+                    </div>
+                    <a href="#" class="download-btn">下载</a>
+                </div>
+                <div class="resource-item">
+                    <div>
+                        <strong>ResNet实现代码</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">深度残差网络PyTorch实现</p>
+                    </div>
+                    <a href="#" class="download-btn">下载</a>
+                </div>
+                <div class="resource-item">
+                    <div>
+                        <strong>BERT预训练模型</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">中文BERT模型及使用指南</p>
+                    </div>
+                    <a href="#" class="download-btn">下载</a>
+                </div>
+                <div class="resource-item">
+                    <div>
+                        <strong>GAN系列论文合集</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">生成对抗网络经典论文集</p>
+                    </div>
+                    <a href="#" class="download-btn">下载</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 重要网址 -->
+        <section class="section">
+            <h2 class="section-title">重要网址</h2>
+            <div class="card">
+                <div class="link-grid">
+                    <a href="https://www.kaggle.com" target="_blank" class="link-item">
+                        <div class="link-icon">🏆</div>
+                        <h4>Kaggle</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">数据科学竞赛平台</p>
+                    </a>
+                    <a href="https://arxiv.org" target="_blank" class="link-item">
+                        <div class="link-icon">📄</div>
+                        <h4>arXiv</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">论文预印本库</p>
+                    </a>
+                    <a href="https://github.com" target="_blank" class="link-item">
+                        <div class="link-icon">💻</div>
+                        <h4>GitHub</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">代码托管平台</p>
+                    </a>
+                    <a href="https://huggingface.co" target="_blank" class="link-item">
+                        <div class="link-icon">🤗</div>
+                        <h4>Hugging Face</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">模型与数据集</p>
+                    </a>
+                    <a href="https://paperswithcode.com" target="_blank" class="link-item">
+                        <div class="link-icon">📊</div>
+                        <h4>Papers with Code</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">论文代码实现</p>
+                    </a>
+                    <a href="https://colab.research.google.com" target="_blank" class="link-item">
+                        <div class="link-icon">☁️</div>
+                        <h4>Google Colab</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">免费GPU资源</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习路线 -->
+        <section id="roadmap" class="section">
+            <h2 class="section-title">学习路线</h2>
+            <div class="card">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">第1-2周：基础准备</div>
+                        <h4>Python与深度学习框架</h4>
+                        <p style="color: var(--text-secondary);">熟悉Python编程，掌握PyTorch/TensorFlow基础操作</p>
+                        <p style="margin-top: 0.5rem;"><strong>当前作业：</strong>完成MNIST手写数字识别</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第3-4周：经典网络</div>
+                        <h4>CNN架构研究</h4>
+                        <p style="color: var(--text-secondary);">深入学习LeNet、AlexNet、VGG、ResNet等经典架构</p>
+                        <p style="margin-top: 0.5rem;"><strong>当前作业：</strong>复现ResNet-50并在CIFAR-10上训练</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第5-6周：注意力机制</div>
+                        <h4>Transformer与BERT</h4>
+                        <p style="color: var(--text-secondary);">理解自注意力机制，学习Transformer架构</p>
+                        <p style="margin-top: 0.5rem;"><strong>当前作业：</strong>实现简化版Transformer</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第7-8周：生成模型</div>
+                        <h4>GAN与VAE</h4>
+                        <p style="color: var(--text-secondary);">探索生成对抗网络和变分自编码器</p>
+                        <p style="margin-top: 0.5rem;"><strong>即将开始</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 通知 -->
+        <section id="notices" class="section">
+            <h2 class="section-title">最新通知</h2>
+            <div class="card">
+                <div class="notification">
+                    <span class="notification-badge">重要</span>
+                    <strong>下周三（12月20日）邀请嘉宾分享</strong>
+                    <p style="margin-top: 0.5rem;">华为云AI专家将分享大模型训练经验，请准时参加！</p>
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">作业</span>
+                    <strong>ResNet复现截止日期：12月15日</strong>
+                    <p style="margin-top: 0.5rem;">请将代码和实验报告提交到GitHub仓库</p>
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">活动</span>
+                    <strong>论文分享会报名开始</strong>
+                    <p style="margin-top: 0.5rem;">每位同学可选择一篇感兴趣的论文进行15分钟分享</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 例会资料 -->
+        <section id="meetings" class="section">
+            <h2 class="section-title">例会资料</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2024年12月8日</h3>
+                    <h4>主题：Vision Transformer详解</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">分享人：李四</p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📎 <a href="#" style="color: var(--primary-color);">PPT下载</a></li>
+                        <li>📹 <a href="#" style="color: var(--primary-color);">录屏回放</a></li>
+                        <li>📝 <a href="#" style="color: var(--primary-color);">会议笔记</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2024年12月1日</h3>
+                    <h4>主题：YOLO系列演进</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">分享人：王五</p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📎 <a href="#" style="color: var(--primary-color);">PPT下载</a></li>
+                        <li>📹 <a href="#" style="color: var(--primary-color);">录屏回放</a></li>
+                        <li>📝 <a href="#" style="color: var(--primary-color);">会议笔记</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2024年11月24日</h3>
+                    <h4>主题：强化学习入门</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">分享人：赵六</p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📎 <a href="#" style="color: var(--primary-color);">PPT下载</a></li>
+                        <li>📹 <a href="#" style="color: var(--primary-color);">录屏回放</a></li>
+                        <li>📝 <a href="#" style="color: var(--primary-color);">会议笔记</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习工具箱（额外功能） -->
+        <section class="section">
+            <h2 class="section-title">学习工具箱</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🔧 实用工具</h3>
+                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
+                        <li>📊 <a href="#" style="color: var(--primary-color);">模型性能对比表</a></li>
+                        <li>💡 <a href="#" style="color: var(--primary-color);">论文阅读技巧指南</a></li>
+                        <li>🎯 <a href="#" style="color: var(--primary-color);">GPU服务器使用教程</a></li>
+                        <li>📚 <a href="#" style="color: var(--primary-color);">推荐书单</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🏅 成员成果</h3>
+                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
+                        <li>🎉 张三同学论文被ICML接收</li>
+                        <li>🏆 团队获得Kaggle竞赛铜牌</li>
+                        <li>📝 5篇复现报告获得优秀评级</li>
+                        <li>💻 开源项目获得500+ stars</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📈 学习统计</h3>
+                    <p>本月活跃成员：<strong style="color: var(--primary-color);">45人</strong></p>
+                    <p>累计复现论文：<strong style="color: var(--primary-color);">128篇</strong></p>
+                    <p>代码仓库：<strong style="color: var(--primary-color);">86个</strong></p>
+                    <p>学习笔记：<strong style="color: var(--primary-color);">200+篇</strong></p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 创建背景粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 150; // 增加粒子数量
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                
+                // 为每个粒子添加初始位置数据
+                particle.dataset.originalX = Math.random() * window.innerWidth;
+                particle.dataset.originalY = Math.random() * window.innerHeight;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 鼠标粒子交互 - 增加引力效果
+        function addParticleInteraction() {
+            const particles = document.querySelectorAll('.particle');
+            let mouseX = 0;
+            let mouseY = 0;
+            const attractionRadius = 150; // 引力作用半径
+            const maxAttraction = 0.3; // 最大引力强度
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                particles.forEach(particle => {
+                    const rect = particle.getBoundingClientRect();
+                    const particleX = rect.left + rect.width / 2;
+                    const particleY = rect.top + rect.height / 2;
+                    
+                    const deltaX = mouseX - particleX;
+                    const deltaY = mouseY - particleY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                    if (distance < attractionRadius) {
+                        // 计算引力强度（距离越近引力越强）
+                        const attractionForce = (attractionRadius - distance) / attractionRadius;
+                        const normalizedForce = attractionForce * maxAttraction;
+                        
+                        // 计算引力方向
+                        const forceX = (deltaX / distance) * normalizedForce * 100;
+                        const forceY = (deltaY / distance) * normalizedForce * 100;
+                        
+                        // 应用引力效果
+                        particle.style.transform = `translate(${forceX}px, ${forceY}px)`;
+                        
+                        // 距离越近，粒子变化越明显
+                        if (distance < 80) {
+                            particle.classList.add('hover');
+                            // 更强的视觉效果
+                            const intensity = (80 - distance) / 80;
+                            particle.style.opacity = 0.5 + intensity * 0.5;
+                            particle.style.transform += ` scale(${1 + intensity * 0.5})`;
+                        } else {
+                            particle.classList.remove('hover');
+                            particle.style.opacity = '';
+                        }
+                    } else {
+                        // 超出引力范围，恢复原状
+                        particle.classList.remove('hover');
+                        particle.style.transform = '';
+                        particle.style.opacity = '';
+                    }
+                });
+            });
+
+            // 鼠标离开页面时重置所有粒子
+            document.addEventListener('mouseleave', () => {
+                particles.forEach(particle => {
+                    particle.classList.remove('hover');
+                    particle.style.transform = '';
+                    particle.style.opacity = '';
+                });
+            });
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 添加滚动动画
+        function animateOnScroll() {
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            entry.target.style.transition = 'all 0.6s ease';
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            createParticles();
+            addParticleInteraction();
+            animateOnScroll();
+            enhanceScrollbar();
+        });
+
+        // 添加导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(10, 14, 39, 0.98)';
+            } else {
+                navbar.style.background = 'rgba(10, 14, 39, 0.95)';
+            }
+        });
+
+        // 增强滚动条交互效果
+        function enhanceScrollbar() {
+            let scrollTimeout;
+            
+            // 滚动时添加活跃状态
+            window.addEventListener('scroll', () => {
+                document.body.classList.add('scrolling');
+                
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    document.body.classList.remove('scrolling');
+                }, 150);
+            });
+
+            // 鼠标进入滚动条区域
+            document.addEventListener('mouseenter', (e) => {
+                if (e.target === document.documentElement || e.target === document.body) {
+                    // 检查鼠标是否在滚动条区域
+                    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+                    if (e.clientX > window.innerWidth - scrollbarWidth - 20) {
+                        document.body.classList.add('scrollbar-hover');
+                    }
+                }
+            });
+
+            document.addEventListener('mouseleave', () => {
+                document.body.classList.remove('scrollbar-hover');
+            });
+        }
+
+        // 添加滚动条相关的CSS动画类
+        const scrollbarStyles = document.createElement('style');
+        scrollbarStyles.textContent = `
+            body.scrolling ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #00f0ff, #ff0080) !important;
+                box-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.8),
+                    0 0 30px rgba(255, 0, 255, 0.6) !important;
+                animation: scrollPulse 0.3s ease;
+            }
+
+            @keyframes scrollPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar {
+                width: 16px !important;
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar-track {
+                background: linear-gradient(180deg, rgba(10, 14, 39, 0.7), rgba(26, 31, 58, 0.8)) !important;
+                box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2) !important;
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #00e5ff, #ff1493, #7c3aed) !important;
+                box-shadow: 
+                    0 0 25px rgba(0, 212, 255, 0.7),
+                    0 0 35px rgba(255, 0, 255, 0.5),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.3) !important;
+            }
+        `;
+        document.head.appendChild(scrollbarStyles);
+    </script>
+</body>
+</html>
