@@ -3,15 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">例会详情</title>
+    <title id="page-title">查看详情</title>
     <link rel="icon" type="image/png" href="./img/mdg_logo.png">
     <link rel="shortcut icon" type="image/png" href="./img/mdg_logo.png">
     <link rel="apple-touch-icon" href="./img/mdg_logo.png">
+    <!-- 引入KaTeX用于数学公式渲染 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <!-- 引入marked.js用于Markdown解析 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 引入highlight.js用于代码高亮 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+    <!-- 备用CDN -->
+    <script>
+        // 检查库是否加载成功,如果失败则使用备用CDN
+        window.addEventListener('DOMContentLoaded', function() {
+            // 检查marked是否加载
+            if (typeof marked === 'undefined') {
+                console.warn('marked.js主CDN加载失败,尝试备用CDN');
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/marked/marked.min.js';
+                document.head.appendChild(script);
+            }
+            
+            // 检查hljs是否加载
+            if (typeof hljs === 'undefined') {
+                console.warn('highlight.js主CDN加载失败,尝试备用CDN');
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/atom-one-dark.min.css';
+                document.head.appendChild(link);
+                
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js';
+                document.head.appendChild(script);
+            }
+        });
+    </script>
     <style>
         * {
             margin: 0;
@@ -151,17 +181,152 @@
         .main-content {
             margin-top: 100px;
             padding: 2rem 20px;
-            max-width: 900px;
+            /* 最大显示宽度 */
+            max-width: 1800px;
             margin-left: auto;
             margin-right: auto;
             margin-bottom: 3rem;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        /* 大纲导航 */
+        .toc-sidebar {
+            position: sticky;
+            top: 120px;
+            width: 280px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            background: rgba(20, 25, 47, 0.6);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.15);
+            animation: slideInLeft 0.5s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toc-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toc-title::before {
+            content: '📑';
+            font-size: 1.2rem;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc-link {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-link:hover {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: var(--primary-color);
+            transform: translateX(3px);
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.15);
+            border-left-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 不同层级的缩进 */
+        .toc-link.level-1 {
+            padding-left: 0.6rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .toc-link.level-2 {
+            padding-left: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .toc-link.level-3 {
+            padding-left: 1.8rem;
+            font-size: 0.85rem;
+        }
+
+        .toc-link.level-4 {
+            padding-left: 2.4rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* 大纲滚动条样式 */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+
+        /* 内容区域 */
+        .content-wrapper {
+            flex: 1;
+            min-width: 0;
         }
 
         .content-card {
             background: var(--bg-card);
             background: rgba(20, 25, 47, 0.8);
             border-radius: 15px;
-            padding: 3rem;
+            padding: 2.5rem 3.5rem;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
@@ -187,8 +352,8 @@
         }
 
         #markdown-content h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            margin-bottom: 1.2rem;
             background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -196,6 +361,7 @@
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 0.5rem;
             text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
         }
         
         /* iOS Safari H1兼容性修复 */
@@ -208,47 +374,52 @@
         }
 
         #markdown-content h2 {
-            font-size: 2rem;
-            margin-top: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.6rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
             color: var(--primary-color);
             border-left: 5px solid var(--primary-color);
             padding-left: 1rem;
             text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
         }
 
         #markdown-content h3 {
-            font-size: 1.5rem;
-            margin-top: 2rem;
-            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+            margin-top: 1.6rem;
+            margin-bottom: 0.7rem;
             color: var(--accent-color);
             text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
         }
 
         #markdown-content h4 {
-            font-size: 1.2rem;
-            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            margin-top: 1.4rem;
             margin-bottom: 0.6rem;
             color: var(--secondary-color);
             text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
         }
 
         #markdown-content p {
-            margin-bottom: 1.2rem;
-            line-height: 1.8;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
             color: var(--text-primary);
             text-align: left;
         }
 
         #markdown-content ul, #markdown-content ol {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             padding-left: 2rem;
             color: var(--text-primary);
+            font-size: 0.95rem;
         }
 
         #markdown-content li {
-            margin-bottom: 0.5rem;
-            line-height: 1.8;
+            margin-bottom: 0.4rem;
+            line-height: 1.7;
         }
 
         #markdown-content code {
@@ -257,16 +428,16 @@
             border-radius: 5px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             color: var(--primary-color);
-            font-size: 0.9em;
+            font-size: 0.80em;
         }
 
         #markdown-content pre {
             background: rgba(10, 14, 39, 0.9);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 1.5rem;
+            padding: 1.2rem;
             overflow-x: auto;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1);
         }
 
@@ -274,18 +445,19 @@
             background: transparent;
             padding: 0;
             color: inherit;
-            font-size: 0.95em;
+            font-size: 0.8em;
         }
 
         #markdown-content blockquote {
             border-left: 4px solid var(--secondary-color);
             padding-left: 1.5rem;
-            margin: 1.5rem 0;
+            margin: 1.2rem 0;
             color: var(--text-secondary);
             font-style: italic;
             background: rgba(255, 0, 255, 0.05);
-            padding: 1rem 1.5rem;
+            padding: 0.9rem 1.3rem;
             border-radius: 0 10px 10px 0;
+            font-size: 0.95rem;
         }
 
         #markdown-content a {
@@ -304,21 +476,22 @@
             max-width: 100%;
             height: auto;
             border-radius: 10px;
-            margin: 1.5rem 0;
+            margin: 1.2rem 0;
             box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
         }
 
         #markdown-content table {
             width: 100%;
             border-collapse: collapse;
-            margin: 1.5rem 0;
+            margin: 1.2rem 0;
             background: rgba(0, 212, 255, 0.05);
             border-radius: 10px;
             overflow: hidden;
+            font-size: 0.9rem;
         }
 
         #markdown-content th, #markdown-content td {
-            padding: 1rem;
+            padding: 0.8rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
@@ -337,7 +510,56 @@
             border: none;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), transparent);
-            margin: 2rem 0;
+            margin: 1.5rem 0;
+        }
+
+        /* 数学公式样式 */
+        #markdown-content .katex {
+            font-size: 1.05em;
+        }
+
+        #markdown-content .katex-display {
+            margin: 1.2rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        /* 强调文本样式 */
+        #markdown-content strong {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        #markdown-content em {
+            color: var(--accent-color);
+            font-style: italic;
+        }
+
+        /* 任务列表样式 */
+        #markdown-content input[type="checkbox"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        #markdown-content ul:has(input[type="checkbox"]) {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+
+        /* 表格滚动提示 */
+        #markdown-content .table-wrapper {
+            position: relative;
+        }
+
+        #markdown-content .table-wrapper::after {
+            content: '← 滑动查看更多 →';
+            position: absolute;
+            bottom: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
         }
 
         /* 加载动画 */
@@ -394,6 +616,17 @@
         }
 
         /* 响应式设计 */
+        @media (max-width: 1024px) {
+            /* 平板及以下隐藏大纲 */
+            .toc-sidebar {
+                display: none;
+            }
+
+            .main-content {
+                display: block;
+            }
+        }
+
         @media (max-width: 768px) {
             /* 导航栏适配 */
             .nav-container {
@@ -580,14 +813,25 @@
                 <img src="./img/mdg_logo.png" alt="MDG Logo">
                 智能基座技术部 - 论文复现组
             </a>
-            <a href="index.html#meetings" class="back-btn">← 返回主页</a>
+            <a href="index.html#about" class="back-btn">← 返回主页</a>
         </div>
     </nav>
 
     <!-- 主要内容 -->
     <div class="main-content">
-        <div class="content-card">
-            <div id="markdown-content" class="loading">加载中</div>
+        <!-- 大纲导航 -->
+        <aside class="toc-sidebar" id="toc-sidebar">
+            <div class="toc-title">目录大纲</div>
+            <ul class="toc-list" id="toc-list">
+                <!-- 目录将由JavaScript动态生成 -->
+            </ul>
+        </aside>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+            <div class="content-card">
+                <div id="markdown-content" class="loading">加载中</div>
+            </div>
         </div>
     </div>
 
@@ -641,12 +885,23 @@
                     breaks: true,
                     gfm: true,
                     highlight: function(code, lang) {
-                        if (lang && hljs.getLanguage(lang)) {
+                        // 检查hljs是否已加载
+                        if (typeof hljs !== 'undefined') {
+                            if (lang && hljs.getLanguage(lang)) {
+                                try {
+                                    return hljs.highlight(code, { language: lang }).value;
+                                } catch (err) {
+                                    console.warn('代码高亮失败:', err);
+                                }
+                            }
                             try {
-                                return hljs.highlight(code, { language: lang }).value;
-                            } catch (err) {}
+                                return hljs.highlightAuto(code).value;
+                            } catch (err) {
+                                console.warn('自动代码高亮失败:', err);
+                            }
                         }
-                        return hljs.highlightAuto(code).value;
+                        // 如果hljs未加载,返回原始代码
+                        return code;
                     }
                 });
                 
@@ -662,10 +917,39 @@
                     document.getElementById('page-title').textContent = fileName + ' - 论文复现组';
                 }
                 
-                // 代码高亮
-                contentDiv.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
+                // 为标题添加ID（用于锚点跳转）
+                addHeadingIds(contentDiv);
+                
+                // 生成目录大纲
+                generateTOC(contentDiv);
+                
+                // 代码高亮 - 增加容错处理
+                if (typeof hljs !== 'undefined') {
+                    contentDiv.querySelectorAll('pre code').forEach((block) => {
+                        try {
+                            hljs.highlightElement(block);
+                        } catch (err) {
+                            console.warn('代码块高亮失败:', err);
+                        }
+                    });
+                }
+                
+                // 渲染数学公式 - 使用KaTeX
+                if (typeof renderMathInElement !== 'undefined') {
+                    try {
+                        renderMathInElement(contentDiv, {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false},
+                                {left: '\\(', right: '\\)', display: false},
+                                {left: '\\[', right: '\\]', display: true}
+                            ],
+                            throwOnError: false
+                        });
+                    } catch (err) {
+                        console.warn('数学公式渲染失败:', err);
+                    }
+                }
                 
             } catch (error) {
                 console.error('加载失败:', error);
@@ -680,10 +964,131 @@
             }
         }
 
+        // 为标题添加ID
+        function addHeadingIds(container) {
+            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const usedIds = new Set();
+            
+            headings.forEach((heading, index) => {
+                // 生成ID：使用标题文本，如果重复则添加数字后缀
+                let baseId = heading.textContent
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                
+                if (!baseId) {
+                    baseId = `heading-${index}`;
+                }
+                
+                let id = baseId;
+                let counter = 1;
+                while (usedIds.has(id)) {
+                    id = `${baseId}-${counter}`;
+                    counter++;
+                }
+                
+                heading.id = id;
+                usedIds.add(id);
+            });
+        }
+
+        // 生成目录大纲
+        function generateTOC(container) {
+            const headings = container.querySelectorAll('h1, h2, h3, h4');
+            const tocList = document.getElementById('toc-list');
+            const tocSidebar = document.getElementById('toc-sidebar');
+            
+            if (headings.length === 0) {
+                tocSidebar.style.display = 'none';
+                return;
+            }
+            
+            tocList.innerHTML = '';
+            
+            headings.forEach((heading) => {
+                const level = parseInt(heading.tagName.substring(1));
+                const text = heading.textContent;
+                const id = heading.id;
+                
+                const li = document.createElement('li');
+                li.className = 'toc-item';
+                
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.className = `toc-link level-${level}`;
+                a.textContent = text;
+                
+                // 点击平滑滚动
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // 更新活动状态
+                    document.querySelectorAll('.toc-link').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    a.classList.add('active');
+                    
+                    // 更新URL但不跳转
+                    history.pushState(null, null, `#${id}`);
+                });
+                
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+            
+            // 监听滚动，高亮当前查看的标题
+            setupScrollSpy(headings);
+        }
+
+        // 滚动监听，自动高亮当前查看的标题
+        function setupScrollSpy(headings) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        const activeLink = document.querySelector(`.toc-link[href="#${id}"]`);
+                        
+                        if (activeLink) {
+                            document.querySelectorAll('.toc-link').forEach(link => {
+                                link.classList.remove('active');
+                            });
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '-100px 0px -66%',
+                threshold: 0
+            });
+            
+            headings.forEach(heading => {
+                observer.observe(heading);
+            });
+        }
+
         // 初始化
         window.addEventListener('load', () => {
             createParticles();
-            loadMarkdown();
+            
+            // 确保marked库已加载
+            if (typeof marked === 'undefined') {
+                const contentDiv = document.getElementById('markdown-content');
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">⚠️</div>
+                        <p>Markdown解析库加载失败</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; color: var(--text-secondary);">请检查网络连接或刷新页面重试</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 延迟一点时间确保所有库都加载完成
+            setTimeout(() => {
+                loadMarkdown();
+            }, 100);
         });
 
         // 添加导航栏滚动效果
