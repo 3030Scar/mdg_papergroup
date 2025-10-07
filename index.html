@@ -285,15 +285,51 @@
             background: rgba(0, 212, 255, 0.05);
             border-radius: 10px;
             transition: all 0.3s ease;
+            position: relative;
+            gap: 1rem;
         }
 
         .resource-item:hover {
             background: rgba(0, 212, 255, 0.1);
             transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        /* 资源项文本内容 */
+        .resource-item > div:first-child {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 按钮容器 - 包裹所有按钮 */
+        .resource-item > a.download-btn,
+        .resource-item > .download-btn {
+            opacity: 0;
+            transform: translateX(-10px);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        /* 鼠标悬停时显示按钮 */
+        .resource-item:hover > a.download-btn,
+        .resource-item:hover > .download-btn {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* 为多个按钮添加延迟效果 */
+        .resource-item > a.download-btn:nth-of-type(2) {
+            transition-delay: 0.05s;
+        }
+
+        .resource-item > a.download-btn:nth-of-type(3) {
+            transition-delay: 0.1s;
         }
 
         .download-btn {
-            padding: 0.5rem 1.5rem;
+            padding: 0.5rem 1.2rem;
             background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             border: none;
             border-radius: 25px;
@@ -302,11 +338,169 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .download-btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) !important;
             box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* 确保悬停在按钮上时保持缩放效果 */
+        .resource-item:hover .download-btn:hover {
+            transform: translateX(0) scale(1.05) !important;
+        }
+
+        /* 资源容器 - 可展开收起 */
+        .resource-container {
+            position: relative;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 折叠状态高度 */
+        .resource-container.collapsed { 
+            max-height: 450px;
+        }
+
+        .resource-container.expanded {
+            max-height: 3000px;
+        }
+
+        /* 资源渐变遮罩 */
+        .resource-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(20, 25, 47, 0.5) 30%,
+                rgba(20, 25, 47, 0.8) 60%,
+                var(--bg-card) 100%);
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .resource-container.expanded .resource-fade {
+            opacity: 0;
+        }
+
+        /* 资源展开/收起按钮 */
+        .resource-toggle {
+            position: relative;
+            margin-top: 2rem;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .resource-toggle-btn {
+            padding: 0.8rem 2.5rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid var(--accent-color);
+            border-radius: 50px;
+            color: var(--accent-color);
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 0 20px rgba(124, 58, 237, 0.3),
+                inset 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .resource-toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.2s ease;
+        }
+
+        .resource-toggle-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .resource-toggle-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            box-shadow: 
+                0 0 30px rgba(124, 58, 237, 0.5),
+                0 0 50px rgba(255, 0, 255, 0.3),
+                inset 0 0 30px rgba(124, 58, 237, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .resource-toggle-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(124, 58, 237, 0.6),
+                inset 0 0 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .resource-toggle-btn .btn-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .resource-toggle-btn .btn-icon {
+            display: inline-block;
+            transition: transform 0.4s ease;
+            font-size: 1.1rem;
+        }
+
+        .resource-container.expanded ~ .resource-toggle .resource-toggle-btn .btn-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 资源按钮呼吸动画 */
+        @keyframes pulse-border-purple {
+            0%, 100% {
+                box-shadow: 
+                    0 0 18px rgba(124, 58, 237, 0.25),
+                    0 0 30px rgba(255, 0, 255, 0.1),
+                    inset 0 0 18px rgba(124, 58, 237, 0.08);
+            }
+            25% {
+                box-shadow: 
+                    0 0 24px rgba(124, 58, 237, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(124, 58, 237, 0.15);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(124, 58, 237, 0.5),
+                    0 0 50px rgba(255, 0, 255, 0.3),
+                    inset 0 0 30px rgba(124, 58, 237, 0.2);
+            }
+            75% {
+                box-shadow: 
+                    0 0 24px rgba(124, 58, 237, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(124, 58, 237, 0.15);
+            }
+        }
+
+        .resource-container.collapsed ~ .resource-toggle .resource-toggle-btn {
+            animation: pulse-border-purple 4s ease-in-out infinite;
         }
 
         /* 重要网址 */
@@ -381,6 +575,156 @@
             color: var(--primary-color);
             font-weight: bold;
             margin-bottom: 0.5rem;
+        }
+
+        /* 时间轴容器 - 可展开收起 */
+        .timeline-container {
+            position: relative;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-container.collapsed {
+            max-height: 400px;
+        }
+
+        .timeline-container.expanded {
+            max-height: 5000px;
+        }
+
+        /* 渐变遮罩 */
+        .timeline-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(20, 25, 47, 0.5) 30%,
+                rgba(20, 25, 47, 0.8) 60%,
+                var(--bg-card) 100%);
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .timeline-container.expanded .timeline-fade {
+            opacity: 0;
+        }
+
+        /* 展开/收起按钮 */
+        .timeline-toggle {
+            position: relative;
+            margin-top: 2rem;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .toggle-btn {
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.3),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.2s ease;
+        }
+
+        .toggle-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            box-shadow: 
+                0 0 30px rgba(0, 212, 255, 0.5),
+                0 0 50px rgba(255, 0, 255, 0.3),
+                inset 0 0 30px rgba(0, 212, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .toggle-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.6),
+                inset 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .toggle-btn .btn-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-btn .btn-icon {
+            display: inline-block;
+            transition: transform 0.4s ease;
+            font-size: 1.2rem;
+        }
+
+        .timeline-container.expanded ~ .timeline-toggle .toggle-btn .btn-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 按钮呼吸动画 */
+        @keyframes pulse-border {
+            0%, 100% {
+                box-shadow: 
+                    0 0 18px rgba(0, 212, 255, 0.25),
+                    0 0 30px rgba(255, 0, 255, 0.1),
+                    inset 0 0 18px rgba(0, 212, 255, 0.08);
+            }
+            25% {
+                box-shadow: 
+                    0 0 24px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(0, 212, 255, 0.15);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 255, 0.5),
+                    0 0 50px rgba(255, 0, 255, 0.3),
+                    inset 0 0 30px rgba(0, 212, 255, 0.2);
+            }
+            75% {
+                box-shadow: 
+                    0 0 24px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(0, 212, 255, 0.15);
+            }
+        }
+
+        .timeline-container.collapsed ~ .timeline-toggle .toggle-btn {
+            animation: pulse-border 4s ease-in-out infinite;
         }
 
         /* 学期分割线 */
@@ -596,9 +940,9 @@
                 <li><a href="#about">简介</a></li>
                 <li><a href="#notices">通知</a></li>
                 <li><a href="#resources">资源</a></li>
-                <li><a href="#url">推荐网址</a></li>
+                <li><a href="#url">网址</a></li>
                 <li><a href="#meetings">例会</a></li>
-                <li><a href="#roadmap">学习路线</a></li>
+                <li><a href="#roadmap">大纲</a></li>
                 <li><a href="#others">其他</a></li>
             </ul>
         </div>
@@ -627,6 +971,7 @@
                         <h3 style="color: var(--primary-color);">📟 联系我们</h3>
                         <p>邮件 : ethan@stu2024.jnu.edu.cn</p>
                         <p>微信 : _Fish890</p>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">我们欢迎任何人来旁听学习，即使你不在论文复现组</p>
                     </div>
                 </div>
             </div>
@@ -638,54 +983,116 @@
             <div class="card">
                 <div class="notification">
                     <span class="notification-badge">重要</span>
-                    <strong>下周三（12月20日）邀请嘉宾分享</strong>
-                    <p style="margin-top: 0.5rem;">华为云AI专家将分享大模型训练经验，请准时参加！</p>
+                    <strong>周六（10月18日）智能基座成立大会</strong>
+                    <p style="margin-top: 0.5rem;">需要全体社团成员到场，带上电脑，除特殊情况外尽量不请假</p>
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">重要</span>
+                    <strong>论文复现组提交处</strong>
+                    <p style="margin-top: 0.5rem;">同学可以通过本网页 - 其他 - 提交处上传分享会布置的任务</p>
                 </div>
                 <div class="notification">
                     <span class="notification-badge">作业</span>
-                    <strong>ResNet复现截止日期：12月15日</strong>
-                    <p style="margin-top: 0.5rem;">请将代码和实验报告提交到GitHub仓库</p>
+                    <strong>完成论文复现组测试题</strong>
+                    <p style="margin-top: 0.5rem;">用于给同学参考水平是否达到进入论文复现组的门槛，ddl：10.23</p>
                 </div>
                 <div class="notification">
                     <span class="notification-badge">活动</span>
-                    <strong>论文分享会报名开始</strong>
-                    <p style="margin-top: 0.5rem;">每位同学可选择一篇感兴趣的论文进行15分钟分享</p>
+                    <strong>周日（10月19日）技术部第一次分享会</strong>
+                    <p style="margin-top: 0.5rem;">绪论课，届时会正式介绍两个学习组</p>
                 </div>
             </div>
         </section>
 
-        <!-- 资源下载 -->
+        <!-- 资源栏目 -->
         <section id="resources" class="section">
-            <h2 class="section-title">资源下载</h2>
+            <h2 class="section-title">资源栏目</h2>
             <div class="card">
-                <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📁 论文与代码</h3>
-                <div class="resource-item">
-                    <div>
-                        <strong>Attention Is All You Need</strong>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Transformer架构原始论文</p>
+                <div class="resource-container collapsed" id="resourceContainer">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📁 论文与代码</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Very Deep Convolutional Networks for Large-Scale Image Recognition</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Visual Geometry Group（VGG）提出的论文</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1409.1556" class="download-btn" target="_blank">查看</a>
+                        <a href="https://noahsnail.com/2017/08/17/2017-08-17-VGG%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E2%80%94%E2%80%94%E4%B8%AD%E6%96%87%E7%89%88/" class="download-btn" target="_blank">中译版</a>
                     </div>
-                    <a href="#" class="download-btn">下载</a>
+                    <div class="resource-item">
+                        <div>
+                            <strong>MNIST数据集</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">手写数字识别数据集</p>
+                        </div>
+                        <a href="https://usertshu.github.io/papersreplication.github.io/files/MNIST.zip" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Deep Residual Learning for Image Recognition</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Resnet - 残差神经网络</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1512.03385" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>You Only Look Once</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">YOLO 算法族</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1506.02640" class="download-btn" target="_blank">yolo v1</a>
+                        <a href="https://arxiv.org/abs/1612.08242" class="download-btn" target="_blank">yolo v2</a>
+                    </div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; margin-top: 2rem;">📖 推荐书籍</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《深度学习入门:基于python的理论与实现》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">深度学习入门，咱们简称鱼书</p>
+                        </div>
+                        <a href="https://usertshu.github.io/papersreplication.github.io/files/%E9%B1%BC%E4%B9%A6.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《白话强化学习与PyTorch》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">强化学习入门</p>
+                        </div>
+                        <a href="https://yun.weicheng.men/Book/%E7%99%BD%E8%AF%9D%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%8EPyTorch.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; margin-top: 2rem;">🧭 优秀博客与指南</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Dive Into Deep Learning</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">动手学深度学习</p>
+                        </div>
+                        <a href="https://zh-v2.d2l.ai/chapter_preface/index.html#" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>OpenAI Spinning Up</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">强化学习OpenAI优化策略</p>
+                        </div>
+                        <a href="https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>李沐：动手学深度学习</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">李沐：动手学深度学习</p>
+                        </div>
+                        <a href="https://www.bilibili.com/video/BV1if4y147hS/?spm_id_from=333.999.0.0" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>吴恩达深度学习</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">吴恩达深度学习</p>
+                        </div>
+                        <a href="https://www.bilibili.com/video/BV11H4y1F7uH/?spm_id_from=333.337.search-card.all.click&vd_source=319e14c34f31cf3b9f5b3e554c92ce92" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-fade"></div>
                 </div>
-                <div class="resource-item">
-                    <div>
-                        <strong>ResNet实现代码</strong>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">深度残差网络PyTorch实现</p>
-                    </div>
-                    <a href="#" class="download-btn">下载</a>
-                </div>
-                <div class="resource-item">
-                    <div>
-                        <strong>BERT预训练模型</strong>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">中文BERT模型及使用指南</p>
-                    </div>
-                    <a href="#" class="download-btn">下载</a>
-                </div>
-                <div class="resource-item">
-                    <div>
-                        <strong>GAN系列论文合集</strong>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">生成对抗网络经典论文集</p>
-                    </div>
-                    <a href="#" class="download-btn">下载</a>
+                <div class="resource-toggle">
+                    <button class="resource-toggle-btn" id="resourceToggleBtn" onclick="toggleResource()">
+                        <span class="btn-text">
+                            <span id="resourceBtnText">展开全部资源</span>
+                            <span class="btn-icon">▼</span>
+                        </span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -732,9 +1139,14 @@
                         <p style="font-size: 0.9rem; color: var(--text-secondary);">免费算力+WebIDE</p>
                     </a>
                     </a>
-                    <a href="https://ide.cloud.tencent.com/" target="_blank" class="link-item">
+                    <a href="https://leetcode.cn/" target="_blank" class="link-item">
                         <div class="link-icon">📃</div>
                         <h4>LeetCode</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">代码刷题平台</p>
+                    </a>
+                    <a href="https://www.luogu.com.cn/" target="_blank" class="link-item">
+                        <div class="link-icon">🧬</div>
+                        <h4>洛谷</h4>
                         <p style="font-size: 0.9rem; color: var(--text-secondary);">代码刷题平台</p>
                     </a>
                 </div>
@@ -749,14 +1161,14 @@
                     <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年10月18日</h3>
                     <h4>主题：智能基座成立会</h4><br>
                     <ul style="list-style: none; padding-left: 0;">
-                        <li>📝 <a href="#" style="color: var(--primary-color);">查看详细</a></li>
+                        <li>📝 <a href="markdown-viewer.html?file=智能基座成立大会" style="color: var(--primary-color);">查看详细</a></li>
                     </ul>
                 </div>
                 <div class="card">
                     <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年10月19日</h3>
                     <h4>主题：技术部第一次分享会</h4><br>
                     <ul style="list-style: none; padding-left: 0;">
-                        <li>📝 <a href="#" style="color: var(--primary-color);">查看详细</a></li>
+                        <li>📝 <a href="markdown-viewer.html?file=技术部第一次分享会" style="color: var(--primary-color);">查看详细</a></li>
                     </ul>
                 </div>
             </div>
@@ -766,8 +1178,9 @@
         <section id="roadmap" class="section">
             <h2 class="section-title">学习路线</h2>
             <div class="card">
-                <div class="timeline">
-                    <div class="timeline-item">
+                <div class="timeline-container collapsed" id="timelineContainer">
+                    <div class="timeline">
+                        <div class="timeline-item">
                         <div class="timeline-date">第7-8周：基础准备</div>
                         <h4>Python与深度学习</h4>
                         <p style="color: var(--text-secondary);">熟悉Python编程，了解深度学习与PyTorch基础操作</p>
@@ -792,13 +1205,13 @@
                         <p style="margin-top: 0.5rem;"><strong>即将开始</strong></p>
                     </div>
                     <div class="timeline-item">
-                        <div class="timeline-date">第13-14周：yolo家族</div>
+                        <div class="timeline-date">第13-16周：yolo家族</div>
                         <h4>yolo v1 - v8</h4>
                         <p style="color: var(--text-secondary);">学习理论知识并部署他们</p>
                         <p style="margin-top: 0.5rem;"><strong>即将开始</strong></p>
                     </div>
                     <div class="timeline-item">
-                        <div class="timeline-date">第15-16周：强化学习基础</div>
+                        <div class="timeline-date">寒假：强化学习基础</div>
                         <h4>pytorch与强化学习</h4>
                         <p style="color: var(--text-secondary);">熟悉pytoch基础操作，了解强化学习</p>
                         <p style="margin-top: 0.5rem;"><strong>即将开始：</strong>看完《白话强化学习与Pytorch》1章（强化学习是什么）、2章（强化学习的脉络）、3章（动态规划）、4章（蒙特卡罗法）、5章（时间查分）、8.1（2013版DQN）、8.2（2015版DQN）</p>
@@ -842,25 +1255,31 @@
                         <p style="color: var(--text-secondary);">我还没想好，但这个时候应该准备招代理部长了</p>
                         <p style="margin-top: 0.5rem;"><strong>即将开始</strong></p>
                     </div>
-                    
                 </div>
+                <div class="timeline-fade"></div>
             </div>
-        </section>
+            <div class="timeline-toggle">
+                <button class="toggle-btn" id="toggleBtn" onclick="toggleTimeline()">
+                    <span class="btn-text">
+                        <span id="btnText">展开完整路线</span>
+                        <span class="btn-icon">▼</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </section>
 
         <!-- 其他 -->
         <section id="others" class="section">
             <h2 class="section-title">其他</h2>
             <div class="grid">
                 <div class="card">
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🔧 实用工具</h3>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🔧 工具</h3>
                     <ul style="list-style: none; padding-left: 0; line-height: 2;">
-                        <li>📊 <a href="#" style="color: var(--primary-color);">模型性能对比表</a></li>
-                        <li>💡 <a href="#" style="color: var(--primary-color);">论文阅读技巧指南</a></li>
-                        <li>🎯 <a href="#" style="color: var(--primary-color);">GPU服务器使用教程</a></li>
-                        <li>📚 <a href="#" style="color: var(--primary-color);">推荐书单</a></li>
+                        <li>📤 <a href="https://f.wps.cn/g/ep5IgqHt/" style="color: var(--primary-color);" target="_blank">提交处（代码、作业等）</a></li>
                     </ul>
                 </div>
-                <div class="card">
+                <!-- <div class="card">
                     <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🏅 成员成果</h3>
                     <ul style="list-style: none; padding-left: 0; line-height: 2;">
                         <li>🎉 张三同学论文被ICML接收</li>
@@ -875,7 +1294,7 @@
                     <p>累计复现论文：<strong style="color: var(--primary-color);">128篇</strong></p>
                     <p>代码仓库：<strong style="color: var(--primary-color);">86个</strong></p>
                     <p>学习笔记：<strong style="color: var(--primary-color);">200+篇</strong></p>
-                </div>
+                </div> -->
             </div>
         </section>
     </div>
@@ -999,6 +1418,64 @@
             cards.forEach(card => {
                 observer.observe(card);
             });
+        }
+
+        // 时间轴展开/收起功能
+        function toggleTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const btnText = document.getElementById('btnText');
+            
+            if (container.classList.contains('collapsed')) {
+                // 展开
+                container.classList.remove('collapsed');
+                container.classList.add('expanded');
+                btnText.textContent = '收起路线';
+            } else {
+                // 收起
+                container.classList.remove('expanded');
+                container.classList.add('collapsed');
+                btnText.textContent = '展开完整路线';
+                
+                // 平滑滚动到学习路线标题
+                setTimeout(() => {
+                    const roadmapSection = document.getElementById('roadmap');
+                    if (roadmapSection) {
+                        roadmapSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // 资源栏目展开/收起功能
+        function toggleResource() {
+            const container = document.getElementById('resourceContainer');
+            const btnText = document.getElementById('resourceBtnText');
+            
+            if (container.classList.contains('collapsed')) {
+                // 展开
+                container.classList.remove('collapsed');
+                container.classList.add('expanded');
+                btnText.textContent = '收起资源';
+            } else {
+                // 收起
+                container.classList.remove('expanded');
+                container.classList.add('collapsed');
+                btnText.textContent = '展开全部资源';
+                
+                // 平滑滚动到资源栏目标题
+                setTimeout(() => {
+                    const resourceSection = document.getElementById('resources');
+                    if (resourceSection) {
+                        resourceSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            }
         }
 
         // 初始化

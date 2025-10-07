@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">例会详情</title>
+    <link rel="icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="shortcut icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="apple-touch-icon" href="./img/mdg_logo.png">
+    <!-- 引入marked.js用于Markdown解析 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入highlight.js用于代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #ff00ff;
+            --accent-color: #7c3aed;
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(20, 25, 47, 0.8);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        /* 背景动画粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) translateX(0);
+            }
+            to {
+                transform: translateY(-100px) translateX(100px);
+            }
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .back-btn {
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem 20px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 3rem;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Markdown样式 */
+        #markdown-content {
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        #markdown-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        #markdown-content h2 {
+            font-size: 2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-left: 5px solid var(--primary-color);
+            padding-left: 1rem;
+            text-align: left;
+        }
+
+        #markdown-content h3 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent-color);
+            text-align: left;
+        }
+
+        #markdown-content h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.6rem;
+            color: var(--secondary-color);
+            text-align: left;
+        }
+
+        #markdown-content p {
+            margin-bottom: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        #markdown-content ul, #markdown-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+            color: var(--text-primary);
+        }
+
+        #markdown-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.8;
+        }
+
+        #markdown-content code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: var(--primary-color);
+            font-size: 0.9em;
+        }
+
+        #markdown-content pre {
+            background: rgba(10, 14, 39, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1);
+        }
+
+        #markdown-content pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+            font-size: 0.95em;
+        }
+
+        #markdown-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+            background: rgba(255, 0, 255, 0.05);
+            padding: 1rem 1.5rem;
+            border-radius: 0 10px 10px 0;
+        }
+
+        #markdown-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        #markdown-content a:hover {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+
+        #markdown-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        #markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #markdown-content th, #markdown-content td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #markdown-content th {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        #markdown-content tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        #markdown-content hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), transparent);
+            margin: 2rem 0;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* 错误提示 */
+        .error {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00e5ff, #ff1493);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 2rem 1.5rem;
+            }
+
+            #markdown-content h1 {
+                font-size: 2rem;
+            }
+
+            #markdown-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="./img/mdg_logo.png" alt="MDG Logo">
+                智能基座技术部 - 论文复现组
+            </a>
+            <a href="index.html#meetings" class="back-btn">← 返回主页</a>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <div class="content-card">
+            <div id="markdown-content" class="loading">加载中</div>
+        </div>
+    </div>
+
+    <script>
+        // 创建背景粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 获取URL参数
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // 加载并渲染Markdown文件
+        async function loadMarkdown() {
+            const fileName = getQueryParam('file');
+            const contentDiv = document.getElementById('markdown-content');
+            
+            if (!fileName) {
+                contentDiv.innerHTML = '<div class="error"><div class="error-icon">❌</div><p>未指定文件</p></div>';
+                return;
+            }
+
+            try {
+                // 构建文件路径
+                const filePath = `./data/${fileName}.md`;
+                
+                // 获取Markdown文件
+                const response = await fetch(filePath);
+                
+                if (!response.ok) {
+                    throw new Error('文件不存在');
+                }
+                
+                const markdownText = await response.text();
+                
+                // 配置marked选项
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    highlight: function(code, lang) {
+                        if (lang && hljs.getLanguage(lang)) {
+                            try {
+                                return hljs.highlight(code, { language: lang }).value;
+                            } catch (err) {}
+                        }
+                        return hljs.highlightAuto(code).value;
+                    }
+                });
+                
+                // 转换Markdown为HTML
+                const htmlContent = marked.parse(markdownText);
+                contentDiv.innerHTML = htmlContent;
+                
+                // 更新页面标题
+                const firstH1 = contentDiv.querySelector('h1');
+                if (firstH1) {
+                    document.getElementById('page-title').textContent = firstH1.textContent + ' - 论文复现组';
+                } else {
+                    document.getElementById('page-title').textContent = fileName + ' - 论文复现组';
+                }
+                
+                // 代码高亮
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+                
+            } catch (error) {
+                console.error('加载失败:', error);
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">😕</div>
+                        <p>抱歉,无法加载文件</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; color: var(--text-secondary);">文件: ${fileName}.md</p>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            createParticles();
+            loadMarkdown();
+        });
+
+        // 添加导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(10, 14, 39, 0.98)';
+            } else {
+                navbar.style.background = 'rgba(10, 14, 39, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
