@@ -6,7 +6,7 @@
 
 ### 关于下载
 
-如果你希望下载题目并在本地查看,你可以[点击这里](https://f.wps.cn/g/ep5IgqHt/)进行下载,下载者应当自备查看markdown格式文件的工具(推荐vscode + Office Viewer插件)
+如果你希望下载题目并在本地查看,你可以[点击这里](https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/py_test_dol.md)进行下载,下载者应当自备查看markdown格式文件的工具(推荐vscode + Office Viewer插件)
 
 ### 题目构成
 
