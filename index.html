@@ -201,7 +201,7 @@
         /* 卡片样式 */
         .section {
             margin-bottom: 3rem;
-            scroll-margin-top: 100px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
+            scroll-margin-top: 100px; /* 定位偏移 */
         }
 
         .section-title {
@@ -308,7 +308,7 @@
             min-width: 0;
         }
 
-        /* 按钮容器 - 包裹所有按钮 */
+        /* 按钮容器，包裹所有按钮 */
         .resource-item > a.download-btn,
         .resource-item > .download-btn {
             opacity: 0;
@@ -702,7 +702,7 @@
             transform: rotate(180deg);
         }
 
-        /* 按钮呼吸动画 */
+        /* 路线按钮呼吸动画 */
         @keyframes pulse-border {
             0%, 100% {
                 box-shadow: 
@@ -1177,7 +1177,7 @@
             }
         }
 
-        /* 滚动条样式 - 增强版 */
+        /* 滚动条样式 */
         ::-webkit-scrollbar {
             width: 10px;
             transition: all 0.3s ease;
@@ -1291,6 +1291,12 @@
             <div class="card">
                 <div class="notification">
                     <span class="notification-badge">重要</span>
+                    <strong>安装anaconda</strong>
+                    <p style="margin-top: 0.5rem;">我们推荐全体社团成员在18日成立大会前在电脑安装好anaconda,以方便后续环境操作</p>
+                    <p style="margin-top: 0.5rem;">同学可以跟着<a href="https://blog.csdn.net/lulukanshijie/article/details/150028587" style="color: var(--primary-color);" target="_blank">这篇博客</a>进行操作,或者你也可以使用其他任何能在你的电脑上部署环境的方法</p>
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">重要</span>
                     <strong>周六（10月18日）智能基座成立大会</strong>
                     <p style="margin-top: 0.5rem;">需要全体社团成员到场，带上电脑，除特殊情况外尽量不请假</p>
                 </div>
@@ -1300,19 +1306,19 @@
                     <p style="margin-top: 0.5rem;">同学可以通过本网页 - 其他 - <a href="#others" style="color: var(--primary-color);">提交处</a>上传分享会布置的任务</p>
                 </div>
                 <div class="notification">
+                    <span class="notification-badge">活动</span>
+                    <strong>周日（10月19日）技术部第一次分享会</strong>
+                    <p style="margin-top: 0.5rem;">绪论课，届时会正式介绍技术部的两个学习组分支，并准备分组</p>
+                    <p style="margin-top: 0.5rem;">如果你不熟悉两个分组，可以<a href="markdown-viewer.html?file=分组详细" style="color: var(--primary-color);">点这里</a>查看大致介绍</p>
+                </div>
+                <div class="notification">
                     <span class="notification-badge">作业</span>
                     <strong>完成论文复现组测试题（ddl : 10.23）</strong>
                     <ul style="list-style: none; padding-left: 0; line-height: 2;">
                     <p style="margin-top: 0.5rem;">分组时用于给同学参考水平是否达到进入论文复现组的门槛，完成后上传至提交处，上传代号001</p>
-                    <li>你可以在线点开 <a href="markdown-viewer.html?file=论文复现组——Python测试题" style="color: var(--primary-color);">题目详细</a></li>
+                    <li>你可以在线点开 <a href="markdown-viewer.html?file=py_test" style="color: var(--primary-color);">题目详细</a></li>
                     <li>或者你也可以直接 <a href="https://superstar-1316338656.cos.ap-guangzhou.myqcloud.com/%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0%E7%BB%84%E2%80%94%E2%80%94Python%E6%B5%8B%E8%AF%95%E9%A2%98.md" style="color: var(--primary-color);" target="_blank">下载题目</a>，下载者应当自备查看markdown的工具（vscode、notion等）</li>
                     </ul>
-                    
-                </div>
-                <div class="notification">
-                    <span class="notification-badge">活动</span>
-                    <strong>周日（10月19日）技术部第一次分享会</strong>
-                    <p style="margin-top: 0.5rem;">绪论课，届时会正式介绍技术部的两个学习组分支，并准备分组</p>
                 </div>
             </div>
         </section>
@@ -1592,22 +1598,6 @@
                         <li>📤 <a href="https://f.wps.cn/g/ep5IgqHt/" style="color: var(--primary-color);" target="_blank">提交处（代码、作业等）</a></li>
                     </ul>
                 </div>
-                <!-- <div class="card">
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🏅 成员成果</h3>
-                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
-                        <li>🎉 张三同学论文被ICML接收</li>
-                        <li>🏆 团队获得Kaggle竞赛铜牌</li>
-                        <li>📝 5篇复现报告获得优秀评级</li>
-                        <li>💻 开源项目获得500+ stars</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📈 学习统计</h3>
-                    <p>本月活跃成员：<strong style="color: var(--primary-color);">45人</strong></p>
-                    <p>累计复现论文：<strong style="color: var(--primary-color);">128篇</strong></p>
-                    <p>代码仓库：<strong style="color: var(--primary-color);">86个</strong></p>
-                    <p>学习笔记：<strong style="color: var(--primary-color);">200+篇</strong></p>
-                </div> -->
             </div>
         </section>
     </div>
@@ -1616,7 +1606,7 @@
         // 创建背景粒子效果
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 150; // 增加粒子数量
+            const particleCount = 150; // 背景例子数量
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
@@ -1633,7 +1623,7 @@
             }
         }
 
-        // 鼠标粒子交互 - 增加引力效果
+        // 鼠标粒子交互
         function addParticleInteraction() {
             const particles = document.querySelectorAll('.particle');
             let mouseX = 0;
@@ -1655,7 +1645,7 @@
                     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
                     if (distance < attractionRadius) {
-                        // 计算引力强度（距离越近引力越强）
+                        // 计算引力强度
                         const attractionForce = (attractionRadius - distance) / attractionRadius;
                         const normalizedForce = attractionForce * maxAttraction;
                         
@@ -1819,7 +1809,7 @@
             }
         });
 
-        // 增强滚动条交互效果
+        // 滚动条交互效果
         function enhanceScrollbar() {
             let scrollTimeout;
             
@@ -1849,7 +1839,7 @@
             });
         }
 
-        // 添加滚动条相关的CSS动画类
+        // 滚动条相关的CSS动画类
         const scrollbarStyles = document.createElement('style');
         scrollbarStyles.textContent = `
             body.scrolling ::-webkit-scrollbar-thumb {
