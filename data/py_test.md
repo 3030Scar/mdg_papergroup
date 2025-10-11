@@ -143,19 +143,6 @@ print(Math.fastpow(3, 10))  # 输出：59049
 2. 如果 $n$ 是奇数，先提取一个 $a$ 出来，变成 $a \times a^{n-1}$，然后继续处理 $a^{n-1}$
 3. 重复上述过程，直到指数变为0
 
-**参考代码框架**（帮助理解）：
-
-```python
-def fastpow(a, n):
-    result = 1
-    while n > 0:
-        if n 是奇数:
-            result = result * a
-        a = a * a  # 底数平方
-        n = n // 2  # 指数减半
-    return result
-```
-
 > 提示：判断一个数是奇数还是偶数，可以用 `n % 2` 来判断（余数为1则为奇数）
 
 #### 2. 阅读理解 - MLP计算
